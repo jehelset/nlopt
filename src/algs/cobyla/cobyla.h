@@ -45,6 +45,10 @@ extern "C"
 {
 #endif /* __cplusplus */
 
+nlopt_result trstlp(int *n, int *m, double *a, double *b, double *rho,
+  double *dx, int *ifull, int *iact, double *z__, double *zdota, double *vmultc,
+  double *sdirn, double *dxnew, double *vmultd);
+
 /* NLopt-style interface function */
 nlopt_result cobyla_minimize(unsigned n, nlopt_func f, void *f_data,
                              unsigned m, nlopt_constraint *fc,

@@ -9,6 +9,13 @@ if (CMAKE_HOST_SYSTEM_NAME MATCHES Windows)
   set_tests_properties (check_tutorial PROPERTIES ENVIRONMENT "PATH=${PROJECT_BINARY_DIR}\\${CMAKE_BUILD_TYPE};$ENV{PATH}")  # to load dll
 endif ()
 
+add_executable (cobyla_trstlp_stalling cobyla_trstlp_stalling.cpp)
+target_compile_options(cobyla_trstlp_stalling PRIVATE -Wall -Wextra -pedantic -Werror)
+target_link_libraries (cobyla_trstlp_stalling ${nlopt_lib})
+add_dependencies (tests cobyla_trstlp_stalling)
+target_include_directories (cobyla_trstlp_stalling PRIVATE ${NLOPT_PRIVATE_INCLUDE_DIRS})
+add_test (NAME test_cobyla_trstlp_stalling COMMAND cobyla_trstlp_stalling)
+
 # have to add timer.c and mt19937ar.c as symbols are declared extern
 set (testopt_sources testfuncs.c testfuncs.h testopt.c ${PROJECT_SOURCE_DIR}/src/util/timer.c ${PROJECT_SOURCE_DIR}/src/util/mt19937ar.c)
 if (NOT HAVE_GETOPT OR NOT HAVE_GETOPT_H)
