@@ -316,7 +316,7 @@ static nlopt_result cobylb(int *n, int *m, int *mpp, double *x, double *minf, do
   double *simi, double *datmat, double *a, double *vsig, double *veta,
   double *sigbar, double *dx, double *w, int *iact, cobyla_function *calcfc,
   func_wrap_state *state);
-nlopt_result trstlp(int *n, int *m, double *a, double *b, double *rho,
+nlopt_result trstlp(int *n, int *m, double *a, double *b, double *rho, nlopt_stopping *stop, 
   double *dx, int *ifull, int *iact, double *z__, double *zdota, double *vmultc,
   double *sdirn, double *dxnew, double *vmultd);
 
@@ -922,8 +922,12 @@ L370:
   isdirn = ivmc + mp;
   idxnew = isdirn + *n;
   ivmd = idxnew + *n;
-  rc = trstlp(n, m, &a[a_offset], &con[1], &rho, &dx[1], &ifull, &iact[1], &w[
+
+  int backup_nevals_p = *stop->nevals_p;
+  rc = trstlp(n, m, &a[a_offset], &con[1], &rho, stop, &dx[1], &ifull, &iact[1], &w[
       iz], &w[izdota], &w[ivmc], &w[isdirn], &w[idxnew], &w[ivmd]);
+  *stop->nevals_p = backup_nevals_p;
+
   if (rc != NLOPT_SUCCESS) goto L600;
 #if ENFORCE_BOUNDS
   /* SGJ: since the bound constraints are linear, we should never get
@@ -1245,7 +1249,7 @@ L620:
 
 /* ------------------------------------------------------------------------- */
 nlopt_result trstlp(int *n, int *m, double *a, 
-    double *b, double *rho, double *dx, int *ifull, 
+    double *b, double *rho, nlopt_stopping *stop, double *dx, int *ifull, 
     int *iact, double *z__, double *zdota, double *vmultc,
      double *sdirn, double *dxnew, double *vmultd)
 {
@@ -1269,7 +1273,6 @@ nlopt_result trstlp(int *n, int *m, double *a,
   int kl, kp, kw;
   int nact, icon = 0, mcon;
   int nactx = 0;
-
 
 /* This subroutine calculates an N-component vector DX by applying the */
 /* following two stages. In the first stage, DX is set to the shortest */
@@ -1370,6 +1373,18 @@ L60:
   optold = 0.;
   icount = 0;
 L70:
+
+  if (nlopt_stop_forced(stop))
+    return NLOPT_FORCED_STOP;
+  else if (*(stop->nevals_p) > 0) {
+       if (nlopt_stop_evals(stop))
+         return NLOPT_MAXEVAL_REACHED;
+       else if (nlopt_stop_time(stop))
+         return NLOPT_MAXTIME_REACHED;
+  }
+  ++ (*stop->nevals_p);
+
+
   if (mcon == *m) {
     optnew = resmax;
   } else {

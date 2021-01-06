@@ -45,7 +45,7 @@ extern "C"
 {
 #endif /* __cplusplus */
 
-nlopt_result trstlp(int *n, int *m, double *a, double *b, double *rho,
+nlopt_result trstlp(int *n, int *m, double *a, double *b, double *rho, nlopt_stopping *stop,
   double *dx, int *ifull, int *iact, double *z__, double *zdota, double *vmultc,
   double *sdirn, double *dxnew, double *vmultd);
 

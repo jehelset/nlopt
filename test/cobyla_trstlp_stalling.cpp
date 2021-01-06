@@ -35,8 +35,12 @@ int main(void)
   auto idxnew = w + 533;
   auto ivdm = w + 538;
 
-  auto rc = trstlp(&n, &m, a, con, &rho, dx, &ifull, iact, iz,izdota,ivmc,isdirn,idxnew,ivdm);
+  nlopt_stopping stop;
 
-  assert(rc == NLOPT_SUCCESS);
+  stop.maxeval = 100000;
+  stop.nevals_p = &stop.maxeval;
+  auto rc = trstlp(&n, &m, a, con, &rho, &stop, dx, &ifull, iact, iz,izdota,ivmc,isdirn,idxnew,ivdm);
+
+  assert(rc == NLOPT_MAXEVAL_REACHED);
   return 0;
 }
